@@ -13,5 +13,6 @@ config
 .env
 google-services.json
 GoogleService-Info.plist
+app.json
 # macOS
 .DS_Store

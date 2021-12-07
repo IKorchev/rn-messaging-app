@@ -1,8 +1,8 @@
 import React from "react"
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
-import ChatScreen from "./ChatsScreen"
-import StoriesScreen from "./StoriesScreen"
-import GroupsScreen from "./GroupsScreen"
+import ChatScreen from "../Screens/Tabs/ChatsScreen"
+import StoriesScreen from "../Screens/Tabs/StoriesScreen"
+import GroupsScreen from "../Screens/Tabs/GroupsScreen"
 import screenOptions from "../utils/tabScreenOptions"
 
 const Tab = createMaterialTopTabNavigator()

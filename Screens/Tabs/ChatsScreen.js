@@ -1,21 +1,17 @@
 import React, { useLayoutEffect, useState } from "react"
 import { View, FlatList } from "react-native"
-import { Avatar, ListItem, SearchBar, FAB } from "react-native-elements"
-import { Ionicons, Entypo } from "@expo/vector-icons"
+import { SearchBar, FAB } from "react-native-elements"
+import { Ionicons } from "@expo/vector-icons"
 import tw from "twrnc"
 import { getColor } from "tailwind-rn"
-import {
-  collection,
-  doc,
-  DocumentSnapshot,
-  getDoc,
-  onSnapshot,
-} from "@firebase/firestore"
+import { collection, onSnapshot } from "@firebase/firestore"
 import { db } from "../../firebase"
+import ChatRow from "./ChatRow"
 
 const ChatsScreen = ({ navigation }) => {
   const [text, setText] = useState("")
   const [chatRooms, setChatrooms] = useState([])
+  const [filter, setFilter] = useState("")
   useLayoutEffect(() => {
     const collRef = collection(db, "chats")
     const unsub = onSnapshot(collRef, (snapshot) => {
@@ -24,10 +20,10 @@ const ChatsScreen = ({ navigation }) => {
         ...el.data(),
       }))
       setChatrooms(chatrooms)
-      chatRooms.forEach((room) => console.log(room.id))
     })
     return unsub
   }, [])
+
   return (
     <View style={tw`flex-1 bg-purple-200`}>
       <SearchBar
@@ -44,42 +40,19 @@ const ChatsScreen = ({ navigation }) => {
           />
         )}
         lightTheme={true}
-        onChangeText={setText}
-        value={text}
+        onChangeText={setFilter}
+        placeholder={"Search name"}
+        value={filter}
         style={tw`text-white`}
       />
       <FlatList
-        data={chatRooms}
+        data={chatRooms.filter((el) => {
+          return el.name.toLowerCase().includes(filter.toLowerCase()) ? true : false
+        })}
         keyExtractor={(item, i) => {
           return item.id
         }}
-        renderItem={(item, i) => (
-          <ListItem
-            style={tw`mt-0.5`}
-            onPress={() =>
-              navigation.navigate("Chat", {
-                id: item.item.id,
-                name: item.item.name,
-              })
-            }>
-            <Avatar
-              size={60}
-              rounded
-              source={{
-                uri: "https://pyxis.nymag.com/v1/imgs/630/6e0/eb215ad90cd826b9e57ff505f54c5c7228-07-avatar.rsquare.w700.jpg",
-              }}
-            />
-            <ListItem.Content>
-              <ListItem.Title style={tw`font-bold text-black`}>
-                {item.item.name}
-              </ListItem.Title>
-              <ListItem.Subtitle style={tw`mt-2`}>
-                This is a message from a user
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            <Entypo size={20} name='chevron-right' />
-          </ListItem>
-        )}
+        renderItem={(item, i) => <ChatRow item={item} navigation={navigation} />}
       />
       <View style={tw`absolute bottom-5 right-5`}>
         <FAB

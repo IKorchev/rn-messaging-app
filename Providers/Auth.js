@@ -4,8 +4,15 @@ import * as Google from "expo-google-app-auth"
 import { Alert } from "react-native"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "../firebase"
-import { addDoc, collection, doc, serverTimestamp } from "@firebase/firestore"
-import { GoogleAuthProvider, signInWithCredential } from "@firebase/auth"
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+} from "@firebase/firestore"
+import { GoogleAuthProvider, signInWithCredential, signOut } from "@firebase/auth"
 const AuthContext = createContext({})
 
 export const useAuth = () => {
@@ -50,10 +57,16 @@ const Auth = ({ children }) => {
           message: message,
           createdBy: user.uid,
           createdAt: serverTimestamp(),
+          userInfo: {
+            _id: user.uid,
+            name: user.displayName,
+            avatar: user.photoURL,
+          },
         })
         console.log("Message created with id:", docRef.id)
       }
     } catch (error) {
+      console.log(error.message)
       Alert.alert("OOPS", "Something went wrong! Try again later")
     }
   }
@@ -66,10 +79,13 @@ const Auth = ({ children }) => {
       }
       const { idToken, accessToken, user } = result
       const credential = GoogleAuthProvider.credential(idToken, accessToken)
-      await signInWithCredential(auth, credential)
+      const newuser = await signInWithCredential(auth, credential)
     } catch (error) {
-      throw error
+      console.log(error.message)
     }
+  }
+  const logOut = () => {
+    signOut(auth)
   }
 
   const value = {
@@ -77,6 +93,7 @@ const Auth = ({ children }) => {
     loginWithGoogle,
     addChat,
     addMessage,
+    logOut,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

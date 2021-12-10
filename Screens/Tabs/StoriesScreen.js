@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { View, Text, Image, TouchableOpacity } from "react-native"
+import React, {  useState } from "react"
+import { View,  Image, TouchableOpacity } from "react-native"
 import { AntDesign, Feather } from "@expo/vector-icons"
 import tw from "twrnc"
 

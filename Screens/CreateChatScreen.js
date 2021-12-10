@@ -8,6 +8,7 @@ import tw from "twrnc"
 import { useAuth } from "../Providers/Auth"
 const CreateChatScreen = () => {
   const [chatName, setChatName] = useState("")
+  const [imageUrl, setImageUrl] = useState("")
   const { addChat } = useAuth()
 
   return (
@@ -22,8 +23,14 @@ const CreateChatScreen = () => {
           inputStyle={tw`text-xl`}
           value={chatName}
         />
+        <Input
+          placeholder='Chat name'
+          onChangeText={setImageUrl}
+          inputStyle={tw`text-xl`}
+          value={imageUrl}
+        />
         <Button
-          onPress={() => addChat(chatName)}
+          onPress={() => addChat(chatName, imageUrl)}
           title='Create'
           titleStyle={tw`font-bold uppercase`}
           buttonStyle={tw`bg-purple-400 rounded-lg`}

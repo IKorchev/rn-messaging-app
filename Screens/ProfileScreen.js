@@ -2,23 +2,20 @@ import React, { useState } from "react"
 import { LinearGradient } from "expo-linear-gradient"
 
 import { Alert, Text, View } from "react-native"
-import { Avatar, Icon, Input, Button } from "react-native-elements"
+import { Avatar, Input, Button } from "react-native-elements"
 import tw from "twrnc"
 import { Feather } from "@expo/vector-icons"
 import { getColor } from "tailwind-rn"
 import { useAuth } from "../Providers/Auth"
-import * as DocumentPicker from "expo-document-picker"
+import { getDocumentAsync } from "expo-document-picker"
 import { getStorage, uploadBytes, getDownloadURL } from "firebase/storage"
 import { updateProfile } from "@firebase/auth"
-import { collection, getDocs, query, where } from "@firebase/firestore"
-import { db } from "../firebase"
 
 const ProfileScreen = () => {
   const { user, logOut } = useAuth()
   const storage = getStorage()
   const [displayName, setDisplayName] = useState(user.displayName)
   const [image, setImage] = useState(null)
-  const [docIds, setDocIds] = useState([])
 
   const handleSave = async () => {
     if (!image && displayName.trim() !== "") {
@@ -60,7 +57,7 @@ const ProfileScreen = () => {
           name='edit'
           size={20}
           onPress={async () => {
-            const result = await DocumentPicker.getDocumentAsync({ type: "image/*" })
+            const result = await getDocumentAsync({ type: "image/*" })
             const item = await fetch(result.uri)
             const blob = await item.blob()
             setImage(blob)

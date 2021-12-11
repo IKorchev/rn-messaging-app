@@ -50,26 +50,6 @@ const Auth = ({ children }) => {
       Alert.alert("OOPS", "Something went wrong! Try again later")
     }
   }
-  const addMessage = async (message, chatId) => {
-    try {
-      if (message.trim() !== "") {
-        const docRef = await addDoc(collection(db, "chats", chatId, "messages"), {
-          message: message,
-          createdBy: user.uid,
-          createdAt: serverTimestamp(),
-          userInfo: {
-            _id: user.uid,
-            name: user.displayName,
-            avatar: user.photoURL,
-          },
-        })
-        console.log("Message created with id:", docRef.id)
-      }
-    } catch (error) {
-      console.log(error.message)
-      Alert.alert("OOPS", "Something went wrong! Try again later")
-    }
-  }
 
   const loginWithGoogle = async () => {
     try {
@@ -80,6 +60,14 @@ const Auth = ({ children }) => {
       const { idToken, accessToken, user } = result
       const credential = GoogleAuthProvider.credential(idToken, accessToken)
       const newuser = await signInWithCredential(auth, credential)
+      const { displayName, photoURL, createdAt, phoneNumber } = newuser.user
+      const userObject = {
+        displayName,
+        photoURL,
+        phoneNumber,
+      }
+      const docSnap = await setDoc(doc(db, "users", newuser.user.uid), userObject)
+      console.log(docSnap.id)
     } catch (error) {
       console.log(error.message)
     }
@@ -91,8 +79,6 @@ const Auth = ({ children }) => {
   const value = {
     user,
     loginWithGoogle,
-    addChat,
-    addMessage,
     logOut,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

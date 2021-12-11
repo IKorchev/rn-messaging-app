@@ -10,7 +10,6 @@ const mainScreenOptions = () => {
     header: ({ route, navigation }) => {
       const placement = route.name === "Home" ? "left" : "center"
 
-      const title = route.name === "Chat" ? route.params.name : route.name
       return (
         <Header
           backgroundColor='none'
@@ -29,7 +28,10 @@ const mainScreenOptions = () => {
               </TouchableOpacity>
             )
           }
-          centerComponent={{ text: title, style: tw`text-xl text-white mt-3` }}
+          centerComponent={{
+            text: route.name,
+            style: tw`text-xl text-white mt-3`,
+          }}
           rightComponent={() =>
             route.name !== "Profile" && (
               <Pressable

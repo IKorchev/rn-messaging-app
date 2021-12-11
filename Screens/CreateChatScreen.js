@@ -3,13 +3,11 @@ import { Text, View } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { Button, Input } from "react-native-elements"
 import { getColor } from "tailwind-rn"
-import { collection, addDoc } from "firebase/firestore"
 import tw from "twrnc"
-import { useAuth } from "../Providers/Auth"
+import { useData } from "../Providers/Data"
 const CreateChatScreen = () => {
   const [chatName, setChatName] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
-  const { addChat } = useAuth()
+  const { addChat } = useData()
 
   return (
     <LinearGradient
@@ -23,14 +21,8 @@ const CreateChatScreen = () => {
           inputStyle={tw`text-xl`}
           value={chatName}
         />
-        <Input
-          placeholder='Chat name'
-          onChangeText={setImageUrl}
-          inputStyle={tw`text-xl`}
-          value={imageUrl}
-        />
         <Button
-          onPress={() => addChat(chatName, imageUrl)}
+          onPress={() => addChat(chatName)}
           title='Create'
           titleStyle={tw`font-bold uppercase`}
           buttonStyle={tw`bg-purple-400 rounded-lg`}

@@ -8,7 +8,7 @@ import IndividualChatScreen from "./IndividualChatScreen"
 import ProfileScreen from "./ProfileScreen"
 import CreateChatScreen from "./CreateChatScreen"
 import { useAuth } from "../Providers/Auth"
-
+import Data from "../Providers/Data"
 const Stack = createNativeStackNavigator()
 
 const MainNavigator = () => {
@@ -19,12 +19,7 @@ const MainNavigator = () => {
         <Stack.Screen name='Login' component={LoginScreen} />
       ) : (
         <>
-          <Stack.Group
-            screenOptions={({ route, navigation }) => {
-              return {
-                title: route.name === "Chat" ? route.params.name : "",
-              }
-            }}>
+          <Stack.Group>
             <Stack.Screen name='Home' component={HomeScreen} />
             <Stack.Screen name='Chat' component={IndividualChatScreen} />
             <Stack.Screen name='Profile' component={ProfileScreen} />

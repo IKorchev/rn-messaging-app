@@ -1,7 +1,7 @@
-
+import tw from "twrnc"
 import { getColor } from "tailwind-rn"
 const screenOptions = {
-  tabBarStyle: { backgroundColor: getColor("purple-600") },
+  tabBarStyle: [{}, tw`shadow-lg bg-purple-700`],
   tabBarActiveTintColor: "white",
   tabBarItemStyle: {
     fontSize: "bold",

@@ -27,6 +27,7 @@ const ChatRow = ({ item, navigation }) => {
         navigation.navigate("Chat", {
           id: item.item.id,
           name: item.item.name,
+          createdBy: item.item.createdBy,
         })
       }>
       <Blockies

@@ -1,103 +1,76 @@
-import React, { useState } from "react"
-import { View, TouchableOpacity } from "react-native"
-import { Text, Input, Button, Image } from "react-native-elements"
-import { Feather } from "@expo/vector-icons"
-import { getDocumentAsync } from "expo-document-picker"
-import { getStorage, uploadBytes, getDownloadURL } from "firebase/storage"
-import { deleteObject, ref } from "@firebase/storage"
+import { collection, onSnapshot, orderBy, query } from "@firebase/firestore"
+import React, { useEffect, useState } from "react"
+import { FlatList, View } from "react-native"
+import { Avatar, Text, Card } from "react-native-elements"
+import { getColor } from "tailwind-rn"
+
 import tw from "twrnc"
-import { useAuth } from "../../Providers/Auth"
+
+import CreatePost from "../../Components/CreatePost"
+import CustomCard from "../../Components/CustomCard"
+import GradientButton from "../../Components/GradientButton"
 import { db } from "../../firebase"
-import { addDoc, collection, serverTimestamp } from "@firebase/firestore"
-
-const FeedScreen = () => {
+import { useAuth } from "../../Providers/Auth"
+import { useData } from "../../Providers/Data"
+const FeedScreen = ({ navigation }) => {
   const { user } = useAuth()
-  const [image, setImage] = useState()
-  const storage = getStorage()
-  const [imageUrl, setImageUrl] = useState()
-  const [text, setText] = useState("")
-
-  const imageUploadHandler = async () => {
-    try {
-      const result = await getDocumentAsync({ type: "image/*" })
-      const storageRef = ref(storage, `${user.uid}/posts/${result.name}`)
-      const item = await fetch(result.uri)
-      const blob = await item.blob()
-      setImage(result)
-      const snapshot = await uploadBytes(storageRef, blob)
-      const imageUrl = await getDownloadURL(storageRef)
-      setImageUrl(imageUrl)
-    } catch (error) {
-      console.log(error.message)
-    }
+  const { getUserInfo } = useData()
+  const [posts, setPosts] = useState([])
+  const ref = collection(db, "posts")
+  const q = query(ref, orderBy("createdAt", "desc"))
+  const [visible, setVisible] = useState(false)
+  const toggleOverlay = () => {
+    setVisible(!visible)
   }
-  const addPostHandler = async (postObject) => {
-    try {
-      if (imageUrl) {
-        const postObject = {
-          image_url: imageUrl,
-          text: text,
-          likes: 0,
-          comments: [],
-          createdBy: user.uid,
-          createdAt: serverTimestamp(),
+  useEffect(
+    () =>
+      onSnapshot(q, (el) => {
+        if (el) {
+          const docs = el.docs.map((el) => ({ ...el.data(), id: el.id }))
+          setPosts(docs)
         }
-        const postsRef = collection(db, "posts")
-        const res = await addDoc(postsRef, postObject)
-        setImageUrl(null)
-        setText("")
-      }
-    } catch (error) {
-      console.log(error.message)
-    }
-  }
-  const removeImageHandler = async () => {
-    try {
-      const storageRef = ref(storage, `${user.uid}/posts/${image.name}`)
-      const deletedObject = await deleteObject(storageRef)
-      setImage(null)
-      setImageUrl(null)
-    } catch (error) {
-      console.log(error.message)
-    }
-  }
+      }),
+    []
+  )
+
   return (
-    <View style={tw`flex-1 bg-purple-50`}>
-      <View style={tw`mt-5 p-3 bg-white items-center mx-2 shadow-lg`}>
-        {!imageUrl ? (
-          <TouchableOpacity
-            onPress={imageUploadHandler}
-            style={tw`flex-row bg-gray-100 w-48 shadow-lg mb-5 h-10 items-center justify-evenly rounded-full`}>
-            <Text style={tw`text-black font-bold`}>Choose an image</Text>
-            <Feather name='image' color='black' size={25} />
-          </TouchableOpacity>
-        ) : (
-          <View style={tw`relative`}>
-            <Image source={{ uri: imageUrl }} style={tw`h-48 w-48`} />
-            <TouchableOpacity
-              onPress={removeImageHandler}
-              style={tw`absolute top-0 right-0 h-10 w-10 m-1 bg-white items-center rounded-full justify-center`}>
-              <Feather name='x' size={30} />
-            </TouchableOpacity>
-          </View>
-        )}
-        <Input
-          multiline={true}
-          maxLength={150}
-          placeholder='Text'
-          onChangeText={setText}
-          value={text}
+    <View style={tw`flex-1 bg-white`}>
+      <View
+        style={tw`flex-row items-center justify-between bg-white p-1 mx-5 rounded-full shadow-xl my-2`}>
+        <Avatar
+          containerStyle={tw`border border-black`}
+          onPress={async () => console.log(await getUserInfo(user.uid))}
+          source={{ uri: user.photoURL }}
+          size={50}
+          rounded
         />
-        <Button
-          onPress={addPostHandler}
-          title='Post'
-          disabled={imageUrl ? false : true}
-          buttonStyle={tw`bg-black w-24`}
+        <GradientButton
+          title='Create post'
+          iconName='plus-square'
+          buttonStyles={tw`rounded-full`}
+          titleStyles={tw`ml-2`}
+          colors={[getColor("red-500"), getColor("purple-600")]}
+          onPress={toggleOverlay}
         />
       </View>
-      <Text style={tw`text-center mt-5`} h4>
-        What others are doing
-      </Text>
+      <CreatePost visible={visible} toggleVisible={toggleOverlay} />
+      <FlatList
+        data={posts}
+        contentContainerStyle={tw`px-5 `}
+        keyExtractor={(el, i) => i}
+        renderItem={({ item }) => {
+          return (
+            <CustomCard
+              id={item.id}
+              likes={item.likes}
+              imageUrl={item.image_url}
+              text={item.text}
+              createdBy={item.createdBy}
+              comments={item.comments}
+            />
+          )
+        }}
+      />
     </View>
   )
 }

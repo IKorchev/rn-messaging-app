@@ -1,7 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, { createContext, useContext } from "react"
 import { Alert } from "react-native"
 import { db } from "../firebase"
-import { addDoc, collection, serverTimestamp } from "@firebase/firestore"
+import {
+  addDoc,
+  collection,
+  getDoc,
+  serverTimestamp,
+  doc,
+  arrayUnion,
+  updateDoc,
+} from "@firebase/firestore"
 import { useAuth } from "./Auth"
 const DataContext = createContext({})
 
@@ -18,6 +26,7 @@ const Data = ({ children }) => {
         name: name,
         createdBy: user.uid,
       })
+      Alert.alert("Chat created", `Successfully created chat: ${name}`)
     } catch (error) {
       Alert.alert("OOPS", "Something went wrong! Try again later")
     }
@@ -42,10 +51,52 @@ const Data = ({ children }) => {
       Alert.alert("OOPS", "Something went wrong! Try again later")
     }
   }
-
+  const addPost = async (postObject) => {
+    if (!postObject) {
+      Alert.alert("Ooops", "Something went wrong. Please make sure you upload an image.")
+      return
+    }
+    try {
+      const dbObject = {
+        ...postObject,
+        likes: 0,
+        comments: [],
+        createdBy: user.uid,
+        createdAt: serverTimestamp(),
+      }
+      const postsRef = collection(db, "posts")
+      const res = await addDoc(postsRef, dbObject)
+      console.log(res.id)
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
+  const addComment = async (postId, object) => {
+    try {
+      const postRef = doc(db, "posts", postId)
+      const snap = await updateDoc(postRef, {
+        comments: arrayUnion(object),
+      })
+      console.log(snap)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const getUserInfo = async (uid) => {
+    try {
+      const docRef = doc(db, "users", uid)
+      const docSnap = await getDoc(docRef)
+      return docSnap.data()
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
   const value = {
     addChat,
     addMessage,
+    addPost,
+    addComment,
+    getUserInfo,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

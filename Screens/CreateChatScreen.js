@@ -10,11 +10,9 @@ const CreateChatScreen = () => {
   const { addChat } = useData()
 
   return (
-    <LinearGradient
-      style={tw`flex-1`}
-      colors={[getColor("purple-50"), getColor("purple-100")]}>
+    <View style={tw`flex-1 bg-white`}>
       <Text style={tw`text-2xl font-bold text-center mt-5`}> Create Chat </Text>
-      <View style={tw`p-4 h-48 rounded-xl justify-between mt-12`}>
+      <View style={tw`p-4 h-48 rounded-xl mt-12`}>
         <Input
           placeholder='Chat name'
           onChangeText={setChatName}
@@ -22,13 +20,17 @@ const CreateChatScreen = () => {
           value={chatName}
         />
         <Button
-          onPress={() => addChat(chatName)}
+          onPress={() => {
+            addChat(chatName)
+            setChatName("")
+          }}
           title='Create'
+          containerStyle={tw`shadow-2xl shadow-purple-900 `}
           titleStyle={tw`font-bold uppercase`}
-          buttonStyle={tw`bg-purple-400 rounded-lg`}
+          buttonStyle={tw`bg-purple-900 rounded-lg `}
         />
       </View>
-    </LinearGradient>
+    </View>
   )
 }
 

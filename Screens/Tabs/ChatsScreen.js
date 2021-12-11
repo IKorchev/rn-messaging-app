@@ -54,10 +54,10 @@ const ChatsScreen = ({ navigation }) => {
         }}
         renderItem={(item, i) => <ChatRow item={item} navigation={navigation} />}
       />
-      <View style={tw`absolute bottom-5 right-5`}>
+      <View style={tw`absolute bottom-5 right-5 `}>
         <FAB
           icon={<Ionicons name='add' size={26} color='white' />}
-          style={tw`items-center`}
+          style={tw`items-center shadow-2xl shadow-purple-900`}
           onPress={() => {
             navigation.navigate("Create")
           }}

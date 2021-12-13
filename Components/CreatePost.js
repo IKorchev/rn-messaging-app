@@ -67,7 +67,7 @@ const CreatePost = ({ visible, toggleVisible }) => {
         {!imageUrl ? (
           <TouchableOpacity
             onPress={imageUploadHandler}
-            style={tw`flex-row bg-green-900 w-full w-92 shadow-lg h-12 items-center justify-center rounded-xl`}>
+            style={tw`flex-row bg-gray-900 w-full w-92 shadow-lg h-12 items-center justify-center rounded-xl`}>
             <Feather name='image' color='white' size={25} />
             <Text style={tw`text-white text-lg font-bold ml-2`}>Choose an image</Text>
           </TouchableOpacity>

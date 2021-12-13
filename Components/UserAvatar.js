@@ -19,7 +19,7 @@ const UserAvatar = ({ uid, size, name }) => {
       <Avatar
         size={size || 30}
         rounded
-        containerStyle={tw`mr-2`}
+        containerStyle={tw`mr-2 border border-black`}
         source={{
           uri: userInfo?.photoURL,
         }}

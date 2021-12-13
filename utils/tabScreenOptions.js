@@ -1,15 +1,16 @@
 import tw from "twrnc"
 import { getColor } from "tailwind-rn"
+import f from "../utils/poppins"
 const screenOptions = {
-  tabBarStyle: [{}, tw`shadow-2xl shadow-blue-900  bg-purple-500`],
+  tabBarStyle: [{}, tw`shadow-2xl shadow-blue-900  bg-purple-50`],
   tabBarActiveTintColor: "white",
   tabBarItemStyle: {
     fontSize: "bold",
   },
   tabBarIndicatorStyle: {
-    backgroundColor: getColor("yellow-100"),
+    backgroundColor: getColor("purple-700"),
     height: 4,
   },
-  tabBarLabelStyle: [{ fontSize: 15 }, tw`font-bold`],
+  tabBarLabelStyle: [{ fontSize: 15 }, tw`font-bold text-black`],
 }
 export default screenOptions

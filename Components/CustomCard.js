@@ -1,16 +1,10 @@
 import { Feather } from "@expo/vector-icons"
-import { serverTimestamp } from "@firebase/firestore"
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native"
-import { Image, Text, Input, Overlay, Avatar, Divider } from "react-native-elements"
+import React, { useRef, useState } from "react"
+import { FlatList, KeyboardAvoidingView, TouchableOpacity, View } from "react-native"
+import { Image, Text, Input, Divider, BottomSheet } from "react-native-elements"
 import { getColor } from "tailwind-rn"
 import tw from "twrnc"
+import f from "../utils/poppins"
 import { useAuth } from "../Providers/Auth"
 import { useData } from "../Providers/Data"
 import UserAvatar from "./UserAvatar"
@@ -26,13 +20,12 @@ const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
         text: comment,
         createdBy: user.uid,
       }
-      flatlistRef.current.scrollToIndex({ index: comments.length - 1, animated: true })
       addComment(id, object)
       setComment("")
+      setVisible(false)
     }
   }
 
-  useLayoutEffect(() => {}, [])
   return (
     <KeyboardAvoidingView style={tw`bg-white shadow-xl mb-5 rounded-xl overflow-hidden`}>
       <Image source={{ uri: imageUrl }} style={tw`h-72 `} resizeMode='cover' />
@@ -78,41 +71,59 @@ const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
         // OVERLAY
       }
 
-      <Overlay
-        overlayStyle={tw`w-96 h-[500px]`}
-        visible={visible}
-        animationType='slide'
-        onBackdropPress={() => setVisible(false)}>
-        <Feather
-          name='x'
-          style={tw`absolute top-2 right-2`}
-          size={30}
-          onPress={() => setVisible(false)}
-        />
-        <Text style={tw`py-2 w-32`}>Comments</Text>
-        <FlatList
-          ref={flatlistRef}
-          data={comments}
-          ItemSeparatorComponent={() => (
-            <Divider color={getColor("gray-300")} width={2} />
-          )}
-          initialScrollIndex={comments.length - 1}
-          inverted // last comments appear at the top
-          renderItem={({ item }) => (
-            <View style={tw`flex-row bg-gray-100 overflow-hidden p-2`}>
-              <UserAvatar uid={item.createdBy} />
-              <Text numberOfLines={5}>{item.text}</Text>
-            </View>
-          )}
-        />
-        <Input
-          onChangeText={setComment}
-          style={tw``}
-          value={comment}
-          onSubmitEditing={addCommentHandler}
-          rightIcon={<Feather name='send' onPress={addCommentHandler} size={15} />}
-        />
-      </Overlay>
+      <BottomSheet
+        isVisible={visible}
+        containerStyle={tw`bg-[rgba(0,0,0,0.5)]`}
+        animationType='slide'>
+        <View style={tw`bg-white rounded-xl max-h-[400px] min-h-[300px]`}>
+          <Text style={tw`py-3 text-lg text-center`}>Comments</Text>
+          <Feather
+            name='x'
+            style={tw`absolute top-2 right-2`}
+            size={30}
+            onPress={() => setVisible(false)}
+          />
+          <FlatList
+            ref={flatlistRef}
+            data={comments}
+            initialScrollIndex={comments.length - 1}
+            inverted // last comments appear at the top
+            renderItem={({ item }) => (
+              <View
+                style={tw`flex-row bg-gray-100 items-start mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
+                <UserAvatar uid={item.createdBy} />
+                <View
+                  style={tw`border border-gray-200  bg-white justify-center min-h-12 w-82 rounded-lg`}>
+                  <Text numberOfLines={5} style={[f.poppins, tw`ml-2`]}>
+                    {item.text}
+                  </Text>
+                </View>
+              </View>
+            )}
+          />
+
+          <Input
+            onChangeText={setComment}
+            style={tw``}
+            value={comment}
+            inputContainerStyle={[
+              { borderBottomWidth: 0 },
+              tw`-mb-5 bg-gray-200 rounded-full`,
+            ]}
+            inputStyle={tw`px-5`}
+            onSubmitEditing={addCommentHandler}
+            rightIcon={
+              <Feather
+                name='send'
+                onPress={addCommentHandler}
+                size={25}
+                color='blue'
+                style={tw`bg-gray-100 p-2 px-8 rounded-full`}
+              />
+            }
+          />
+        </View>
+      </BottomSheet>
     </KeyboardAvoidingView>
   )
 }

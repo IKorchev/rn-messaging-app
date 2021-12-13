@@ -1,19 +1,35 @@
-import { Feather } from "@expo/vector-icons"
+import { Feather, Ionicons } from "@expo/vector-icons"
 import React, { useRef, useState } from "react"
-import { FlatList, KeyboardAvoidingView, TouchableOpacity, View } from "react-native"
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native"
 import { Image, Text, Input, Divider, BottomSheet } from "react-native-elements"
 import { getColor } from "tailwind-rn"
 import tw from "twrnc"
 import f from "../utils/poppins"
 import { useAuth } from "../Providers/Auth"
-import { useData } from "../Providers/Data"
 import UserAvatar from "./UserAvatar"
-const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
+import { usePostData } from "../Providers/Post"
+import CustomBottomSheet from "./CustomBottomSheet"
+
+const CustomCard = ({ imageUrl, text, createdBy, likedBy, comments, id }) => {
   const { user } = useAuth()
-  const { addComment } = useData()
+  const { addComment, likePost, isPostLiked, unlikePost } = usePostData()
   const flatlistRef = useRef()
-  const [visible, setVisible] = useState(false)
+  const [commentsSheetVisible, setCommentsSheetVisible] = useState(false)
+  const [likesSheetVisible, setLikesSheetVisible] = useState(false)
   const [comment, setComment] = useState("")
+  const liked = isPostLiked(id)
+
+  const createLikesString = (num) => {
+    return num === 0 ? "0 likes" : num === 1 ? "1 like" : num > 1 && `${num} likes`
+  }
+  const likesString = createLikesString(likedBy?.length)
+
   const addCommentHandler = () => {
     if (comment.trim().length > 0) {
       const object = {
@@ -22,21 +38,34 @@ const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
       }
       addComment(id, object)
       setComment("")
-      setVisible(false)
     }
   }
 
   return (
     <KeyboardAvoidingView style={tw`bg-white shadow-xl mb-5 rounded-xl overflow-hidden`}>
-      <Image source={{ uri: imageUrl }} style={tw`h-72 `} resizeMode='cover' />
+      <Image
+        source={{ uri: imageUrl }}
+        style={tw`h-72 `}
+        resizeMode='cover'
+        PlaceholderContent={<ActivityIndicator />}
+      />
       <View style={tw`py-1`}>
         <View style={tw`flex-row items-center justify-between px-3 mb-1`}>
           <View>
             <UserAvatar uid={createdBy} name={true} />
           </View>
           <View style={tw`flex-row`}>
-            <Text style={tw` font-bold mr-2`}>{likes} likes</Text>
-            <Feather name='heart' size={20} style={tw`mr-3`} />
+            <Text onPress={() => setLikesSheetVisible(true)} style={tw` font-bold mr-2`}>
+              {likesString}
+            </Text>
+            <Ionicons
+              onPress={() => {
+                !liked ? likePost(id) : unlikePost(id)
+              }}
+              name={`${liked ? "heart" : "heart-outline"}`}
+              size={20}
+              style={tw`mr-3`}
+            />
             <Feather name='message-circle' size={20} style={tw`mr-3`} />
             <Feather name='share' size={20} />
           </View>
@@ -44,7 +73,7 @@ const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
         <Divider orientation='horizontal' color={getColor("purple-100")} width={1} />
         <View style={tw`p-2`}>
           <Text>{text}</Text>
-          <TouchableOpacity onPress={() => setVisible(true)}>
+          <TouchableOpacity onPress={() => setCommentsSheetVisible(true)}>
             <Text style={tw`font-bold my-2`}>See all comments</Text>
           </TouchableOpacity>
           <Input
@@ -67,63 +96,46 @@ const CustomCard = ({ imageUrl, text, createdBy, likes, comments, id }) => {
         </View>
       </View>
 
-      {
-        // OVERLAY
-      }
+      {/* BOTTOM SHEET FOR COMMENTS  */}
 
-      <BottomSheet
-        isVisible={visible}
-        containerStyle={tw`bg-[rgba(0,0,0,0.5)]`}
-        animationType='slide'>
-        <View style={tw`bg-white rounded-xl max-h-[400px] min-h-[300px]`}>
-          <Text style={tw`py-3 text-lg text-center`}>Comments</Text>
-          <Feather
-            name='x'
-            style={tw`absolute top-2 right-2`}
-            size={30}
-            onPress={() => setVisible(false)}
-          />
-          <FlatList
-            ref={flatlistRef}
-            data={comments}
-            initialScrollIndex={comments.length - 1}
-            inverted // last comments appear at the top
-            renderItem={({ item }) => (
-              <View
-                style={tw`flex-row bg-gray-100 items-start mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
-                <UserAvatar uid={item.createdBy} />
-                <View
-                  style={tw`border border-gray-200  bg-white justify-center min-h-12 w-82 rounded-lg`}>
-                  <Text numberOfLines={5} style={[f.poppins, tw`ml-2`]}>
-                    {item.text}
-                  </Text>
-                </View>
-              </View>
-            )}
-          />
+      <CustomBottomSheet
+        visible={commentsSheetVisible}
+        setVisible={setCommentsSheetVisible}
+        addCommentHandler={addCommentHandler}
+        setComment={setComment}
+        comment={comment}
+        title='Comments'
+        data={comments}
+        flatlistRef={flatlistRef}
+        renderItem={({ item }) => (
+          <View
+            style={tw`flex-row bg-gray-100 items-start mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
+            <UserAvatar uid={item.createdBy} />
+            <View
+              style={tw`border border-gray-200  bg-white justify-center min-h-12 w-82 rounded-lg`}>
+              <Text numberOfLines={5} style={[f.poppins, tw`ml-2`]}>
+                {item.text}
+              </Text>
+            </View>
+          </View>
+        )}
+      />
 
-          <Input
-            onChangeText={setComment}
-            style={tw``}
-            value={comment}
-            inputContainerStyle={[
-              { borderBottomWidth: 0 },
-              tw`-mb-5 bg-gray-200 rounded-full`,
-            ]}
-            inputStyle={tw`px-5`}
-            onSubmitEditing={addCommentHandler}
-            rightIcon={
-              <Feather
-                name='send'
-                onPress={addCommentHandler}
-                size={25}
-                color='blue'
-                style={tw`bg-gray-100 p-2 px-8 rounded-full`}
-              />
-            }
-          />
-        </View>
-      </BottomSheet>
+      {/* BOTTOM SHEET FOR LIKES  */}
+      <CustomBottomSheet
+        visible={likesSheetVisible}
+        setVisible={setLikesSheetVisible}
+        title='Liked by'
+        inverted={false}
+        data={likedBy}
+        flatlistRef={flatlistRef}
+        renderItem={({ item }) => (
+          <View
+            style={tw`flex-row bg-gray-100 items-start  mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
+            <UserAvatar uid={item} name={true} />
+          </View>
+        )}
+      />
     </KeyboardAvoidingView>
   )
 }

@@ -1,5 +1,4 @@
 import React from "react"
-import { View, Text } from "react-native"
 import LoginScreen from "./LoginScreen"
 import HomeScreen from "./HomeScreen"
 import mainScreenOptions from "../utils/mainScreenOptions"
@@ -8,7 +7,6 @@ import IndividualChatScreen from "./Chat"
 import ProfileScreen from "./ProfileScreen"
 import CreateChatScreen from "./CreateChatScreen"
 import { useAuth } from "../Providers/Auth"
-import Data from "../Providers/Data"
 const Stack = createNativeStackNavigator()
 
 const MainNavigator = () => {

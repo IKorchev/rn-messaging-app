@@ -4,14 +4,7 @@ import * as Google from "expo-google-app-auth"
 import { Alert } from "react-native"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "../firebase"
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-} from "@firebase/firestore"
+import { doc, getDoc, setDoc } from "@firebase/firestore"
 import { GoogleAuthProvider, signInWithCredential, signOut } from "@firebase/auth"
 const AuthContext = createContext({})
 
@@ -40,17 +33,6 @@ const Auth = ({ children }) => {
     []
   )
 
-  const addChat = async (name) => {
-    try {
-      const docRef = await addDoc(collection(db, "chats"), {
-        name: name,
-        createdBy: user.providerData[0].displayName,
-      })
-    } catch (error) {
-      Alert.alert("OOPS", "Something went wrong! Try again later")
-    }
-  }
-
   const loginWithGoogle = async () => {
     try {
       const result = await Google.logInAsync(config)
@@ -66,8 +48,9 @@ const Auth = ({ children }) => {
         photoURL,
         phoneNumber,
       }
-      const docSnap = await setDoc(doc(db, "users", newuser.user.uid), userObject)
-      console.log(docSnap.id)
+      const ref = doc(db, "users", newuser.user.uid)
+      const docRef = await getDoc(ref)
+      const docSnap = await setDoc(ref, userObject)
     } catch (error) {
       console.log(error.message)
     }

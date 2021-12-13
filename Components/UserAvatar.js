@@ -1,19 +1,17 @@
 import React, { useEffect, useLayoutEffect, useState } from "react"
-import { Avatar } from "react-native-elements"
+import { Avatar, Tooltip } from "react-native-elements"
 import { useData } from "../Providers/Data"
 import tw from "twrnc"
 import { Text, View } from "react-native"
 const UserAvatar = ({ uid, size, name }) => {
   const { getUserInfo } = useData()
   const [userInfo, setUserInfo] = useState()
+
   //get user info
-  useEffect(() => {
-    const a = async () => {
-      setUserInfo(await getUserInfo(uid))
-      console.log(userInfo)
-    }
-    a()
+  useEffect(async () => {
+    setUserInfo(await getUserInfo(uid))
   }, [uid])
+
   return (
     <View style={tw`flex-row items-center`}>
       <Avatar

@@ -1,37 +1,23 @@
-import { collection, onSnapshot, orderBy, query } from "@firebase/firestore"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { FlatList, View } from "react-native"
-import { Avatar, Text, Card } from "react-native-elements"
+import { Avatar } from "react-native-elements"
 import { getColor } from "tailwind-rn"
-
 import tw from "twrnc"
-
 import CreatePost from "../../Components/CreatePost"
 import CustomCard from "../../Components/CustomCard"
 import GradientButton from "../../Components/GradientButton"
-import { db } from "../../firebase"
 import { useAuth } from "../../Providers/Auth"
 import { useData } from "../../Providers/Data"
-const FeedScreen = ({ navigation }) => {
+import { usePostData } from "../../Providers/Post"
+
+const FeedScreen = () => {
   const { user } = useAuth()
   const { getUserInfo } = useData()
-  const [posts, setPosts] = useState([])
-  const ref = collection(db, "posts")
-  const q = query(ref, orderBy("createdAt", "desc"))
+  const { posts } = usePostData()
   const [visible, setVisible] = useState(false)
   const toggleOverlay = () => {
     setVisible(!visible)
   }
-  useEffect(
-    () =>
-      onSnapshot(q, (el) => {
-        if (el) {
-          const docs = el.docs.map((el) => ({ ...el.data(), id: el.id }))
-          setPosts(docs)
-        }
-      }),
-    []
-  )
 
   return (
     <View style={tw`flex-1 bg-white`}>
@@ -61,8 +47,8 @@ const FeedScreen = ({ navigation }) => {
         renderItem={({ item }) => {
           return (
             <CustomCard
+              likedBy={item.likedBy}
               id={item.id}
-              likes={item.likes}
               imageUrl={item.image_url}
               text={item.text}
               createdBy={item.createdBy}

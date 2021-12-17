@@ -32,7 +32,7 @@ const ChatRow = ({ item, navigation }) => {
       }>
       <Blockies
         blockies={item.item.id} //string content to generate icon
-        size={180} // blocky icon size
+        size={180} 
         style={tw`w-12 h-12`}
       />
       <ListItem.Content>

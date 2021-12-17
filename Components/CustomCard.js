@@ -1,13 +1,14 @@
 import { Feather, Ionicons } from "@expo/vector-icons"
 import React, { useRef, useState } from "react"
+import { TapGestureHandler } from "react-native-gesture-handler"
+
 import {
-  FlatList,
   KeyboardAvoidingView,
   TouchableOpacity,
   View,
   ActivityIndicator,
 } from "react-native"
-import { Image, Text, Input, Divider, BottomSheet } from "react-native-elements"
+import { Image, Text, Input, Divider } from "react-native-elements"
 import { getColor } from "tailwind-rn"
 import tw from "twrnc"
 import f from "../utils/poppins"
@@ -40,13 +41,16 @@ const CustomCard = ({ imageUrl, text, createdBy, likedBy, comments, id }) => {
       setComment("")
     }
   }
+  const doubleTapHandler = (event) => {
+    console.log(event)
+  }
 
   return (
     <KeyboardAvoidingView style={tw`bg-white shadow-xl mb-5 rounded-xl overflow-hidden`}>
       <Image
         source={{ uri: imageUrl }}
-        style={tw`h-72 `}
-        resizeMode='cover'
+        style={tw`h-72`}
+        resizeMode='contain'
         PlaceholderContent={<ActivityIndicator />}
       />
       <View style={tw`py-1`}>
@@ -72,14 +76,23 @@ const CustomCard = ({ imageUrl, text, createdBy, likedBy, comments, id }) => {
         </View>
         <Divider orientation='horizontal' color={getColor("purple-100")} width={1} />
         <View style={tw`p-2`}>
-          <Text>{text}</Text>
-          <TouchableOpacity onPress={() => setCommentsSheetVisible(true)}>
-            <Text style={tw`font-bold my-2`}>See all comments</Text>
-          </TouchableOpacity>
+          <Text style={[f.poppins, tw`text-md`]}>{text}</Text>
+          <Divider />
+          {comments.length > 0 ? (
+            <TouchableOpacity onPress={() => setCommentsSheetVisible(true)}>
+              <Text style={tw`font-bold my-2 mx-2`}>
+                {comments.length === 1
+                  ? `See 1 comment`
+                  : `See all ${comments.length} comments`}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={tw`font-bold my-2 mx-2`}>No comments yet</Text>
+          )}
           <Input
             onChangeText={setComment}
             value={comment}
-            containerStyle={tw`border border-gray-200 pb-0 rounded-md h-10`}
+            containerStyle={tw`border border-gray-200 pb-0 mt-1 rounded-md h-10`}
             placeholder='comment'
             onSubmitEditing={addCommentHandler}
             inputStyle={tw`text-sm`}
@@ -107,18 +120,22 @@ const CustomCard = ({ imageUrl, text, createdBy, likedBy, comments, id }) => {
         title='Comments'
         data={comments}
         flatlistRef={flatlistRef}
-        renderItem={({ item }) => (
-          <View
-            style={tw`flex-row bg-gray-100 items-start mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
-            <UserAvatar uid={item.createdBy} />
+        renderItem={({ item }) =>
+          item ? (
             <View
-              style={tw`border border-gray-200  bg-white justify-center min-h-12 w-82 rounded-lg`}>
-              <Text numberOfLines={5} style={[f.poppins, tw`ml-2`]}>
-                {item.text}
-              </Text>
+              style={tw`flex-row bg-gray-100 items-start mx-2 overflow-hidden px-2 py-1 rounded-sm mb-0.5`}>
+              <UserAvatar uid={item.createdBy} />
+              <View
+                style={tw`border border-gray-200  bg-white justify-center min-h-12 w-82 rounded-lg`}>
+                <Text numberOfLines={5} style={[f.poppins, tw`ml-2`]}>
+                  {item.text}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
+          ) : (
+            <Text>No comments yet</Text>
+          )
+        }
       />
 
       {/* BOTTOM SHEET FOR LIKES  */}

@@ -3,16 +3,10 @@ import { Alert } from "react-native"
 import { db } from "../firebase"
 import {
   doc,
-  where,
-  query,
   addDoc,
   getDoc,
-  getDocs,
   collection,
   serverTimestamp,
-  arrayUnion,
-  arrayRemove,
-  updateDoc,
   onSnapshot,
 } from "@firebase/firestore"
 import { useAuth } from "./Auth"
@@ -24,7 +18,21 @@ export const useData = () => {
 
 const Data = ({ children }) => {
   const { user } = useAuth()
+  const [allUsers, setAllUsers] = useState([])
 
+  useEffect(() => {
+    const usersRef = collection(db, "users")
+    const unsubscribe = onSnapshot(usersRef, (el) => {
+      const arrayOfUsers = el.docs.map((el) => {
+        return {
+          id: el.id,
+          ...el.data(),
+        }
+      })
+      setAllUsers(arrayOfUsers)
+    })
+    return unsubscribe
+  }, [])
   const addChat = async (name) => {
     try {
       const docRef = await addDoc(collection(db, "chats"), {
@@ -69,6 +77,7 @@ const Data = ({ children }) => {
     addChat,
     addMessage,
     getUserInfo,
+    allUsers,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

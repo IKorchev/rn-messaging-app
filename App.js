@@ -1,8 +1,10 @@
 import { LogBox } from "react-native"
+import { Notifications } from "expo-notifications"
+import "react-native-gesture-handler"
 import { YellowBox } from "react-native"
 YellowBox.ignoreWarnings([""])
 LogBox.ignoreAllLogs(true)
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { NavigationContainer } from "@react-navigation/native"
 import tw from "twrnc"
 import AppLoading from "expo-app-loading"
@@ -52,7 +54,26 @@ const App = () => {
     Poppins_900Black,
     Poppins_900Black_Italic,
   })
+  const [expoPushToken, setExpoPushToken] = useState("")
 
+  const registerForPushNotificationsAsync = async () => {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync()
+    let finalStatus = existingStatus
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync()
+      finalStatus = status
+    }
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!")
+      return
+    }
+    const token = (await Notifications.getExpoPushTokenAsync()).data
+    console.log(token)
+    setExpoPushToken(token)
+  }
+  useEffect(() => {
+    registerForPushNotificationsAsync()
+  }, [])
   if (!fontsLoaded) {
     return <AppLoading />
   } else {

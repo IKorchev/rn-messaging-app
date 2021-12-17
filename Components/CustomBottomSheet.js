@@ -20,7 +20,7 @@ const CustomBottomSheet = ({
       isVisible={visible}
       containerStyle={tw`bg-[rgba(0,0,0,0.5)]`}
       animationType='slide'>
-      <View style={tw`bg-white rounded-xl max-h-96 min-h-[300px]`}>
+      <View style={tw`bg-white rounded-xl max-h-96 py-1 min-h-[200px]`}>
         <Text style={tw`py-3 text-lg text-center`}>{title}</Text>
         <Feather
           name='x'
@@ -31,6 +31,13 @@ const CustomBottomSheet = ({
         <FlatList
           ref={flatlistRef}
           data={data}
+          ListEmptyComponent={
+            <View style={tw`flex-1 items-center justify-center`}>
+              <Text style={tw`text-center`}>
+                {title === "Comments" ? "No comments yet" : "No likes yet"}
+              </Text>
+            </View>
+          }
           initialScrollIndex={data.length - 1}
           inverted={inverted} // last comments appear at the top
           renderItem={renderItem}

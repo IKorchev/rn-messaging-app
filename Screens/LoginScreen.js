@@ -17,7 +17,9 @@ const LoginScreen = () => {
           Social Media App
         </Text>
         <View style={tw` mt-48`}>
-          <Text style={[f.poppins_bold, tw`text-3xl text-white`]}>Get started</Text>
+          <Text style={[f.poppins_bold, tw`text-3xl text-center text-white`]}>
+            Get started
+          </Text>
           <TouchableOpacity onPress={loginWithGoogle} style={tw`mt-5`}>
             <Image source={GoogleBtn} style={tw`w-48 h-12`} resizeMode='cover' />
           </TouchableOpacity>
